@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-// * 占空比决定了音量，而PWM的频率决定了音调。
+// * PWM占空比决定了音量，PWM的频率决定了音调。
 
 module music_gen (
     input  wire rst,
@@ -52,15 +52,19 @@ module music_gen (
 
 
   parameter NUM_NOTES = 25;
-  reg [31:0] clk_freq = 50000000;  // 50 MHz 时钟频率
-  reg [31:0] note_counter;
-  reg [15:0] note_index;
+  reg [31:0] clk_freq = 50000000;  // 50 MHz 时钟频率,1s = 50,000,000个时钟周期
+  reg [31:0] beat_1_4 = 50000000 / 4; // 1/4拍
 
-  // 定义音符频率和持续时间
   reg [31:0] note_frequencies[0:NUM_NOTES-1];
   reg [31:0] note_durations[0:NUM_NOTES-1];
 
+  reg [31:0] note_counter;
+  reg [15:0] note_index;
+  parameter Init = 0, Play_Note = 1, Change_Note = 2;
+  reg [1:0] state;
+
   initial begin
+    state = Init;
     note_frequencies[0] = m_5;
     note_frequencies[1] = m_5;
     note_frequencies[2] = m_6;
@@ -87,54 +91,36 @@ module music_gen (
     note_frequencies[23] = h_2;
     note_frequencies[24] = h_1;
 
-    note_durations[0] = clk_freq / 1;  // 1拍
-    note_durations[1] = clk_freq / 1;  // 1拍
-    note_durations[2] = clk_freq / 2;  // 2拍
-    note_durations[3] = clk_freq / 2;  // 2拍
-    note_durations[4] = clk_freq / 2;  // 2拍
-    note_durations[5] = clk_freq / 4;  // 4拍
-    note_durations[6] = clk_freq / 1;  // 1拍
-    note_durations[7] = clk_freq / 1;  // 1拍
-    note_durations[8] = clk_freq / 2;  // 2拍
-    note_durations[9] = clk_freq / 2;  // 2拍
-    note_durations[10] = clk_freq / 2;  // 2拍
-    note_durations[11] = clk_freq / 4;  // 4拍
-    note_durations[12] = clk_freq / 1;  // 1拍
-    note_durations[13] = clk_freq / 1;  // 1拍
-    note_durations[14] = clk_freq / 2;  // 2拍
-    note_durations[15] = clk_freq / 2;  // 2拍
-    note_durations[16] = clk_freq / 2;  // 2拍
-    note_durations[17] = clk_freq / 2;  // 2拍
-    note_durations[18] = clk_freq / 4;  // 4拍
-    note_durations[19] = clk_freq / 1;  // 1拍
-    note_durations[20] = clk_freq / 1;  // 1拍
-    note_durations[21] = clk_freq / 2;  // 2拍
-    note_durations[22] = clk_freq / 2;  // 2拍
-    note_durations[23] = clk_freq / 2;  // 2拍
-    note_durations[24] = clk_freq / 4;  // 4拍
+    note_durations[0] = beat_1_4 * 3;  
+    note_durations[1] = beat_1_4 * 1;  
+    note_durations[2] = beat_1_4 * 4;  
+    note_durations[3] = beat_1_4 * 4;  
+    note_durations[4] = beat_1_4 * 4;  
+    note_durations[5] = beat_1_4 * 8;  
+    note_durations[6] = beat_1_4 * 3;  
+    note_durations[7] = beat_1_4 * 1;  
+    note_durations[8] = beat_1_4 * 4; 
+    note_durations[9] = beat_1_4 * 4; 
+    note_durations[10] = beat_1_4 * 4;  
+    note_durations[11] = beat_1_4 * 8;  
+    note_durations[12] = beat_1_4 * 3;  
+    note_durations[13] = beat_1_4 * 1;  
+    note_durations[14] = beat_1_4 * 4;  
+    note_durations[15] = beat_1_4 * 4;  
+    note_durations[16] = beat_1_4 * 4;  
+    note_durations[17] = beat_1_4 * 4; 
+    note_durations[18] = beat_1_4 * 4;  
+    note_durations[19] = beat_1_4 * 3;  
+    note_durations[20] = beat_1_4 * 1;  
+    note_durations[21] = beat_1_4 * 4;  
+    note_durations[22] = beat_1_4 * 4;  
+    note_durations[23] = beat_1_4 * 4;  
+    note_durations[24] = beat_1_4 * 8; 
   end
-
-  parameter Init = 0, Play_Note = 1, Change_Note = 2;
-  reg [1:0] state;
-
-  // reg pwm_enable;
-
-  pwm pwm_music (
-      .rst(rst),
-      .clk(clk),
-      .duty(50),
-      .period(clk_freq / note_frequencies[note_index]),
-      .pwm_out(music)
-  );
-
-  // assign music = pwm_enable ? music : 0;
 
   always @(posedge clk or posedge rst) begin
     if (!rst) begin
-      state        <= Init;
-      note_index   <= 0;
-      note_counter <= 0;
-      // pwm_enable   <= 0;
+      state <= Init;
     end else begin
       case (state)
         Init: begin
@@ -144,21 +130,29 @@ module music_gen (
         end
 
         Play_Note: begin
-          if (note_counter < note_durations[note_index]) begin
-            note_counter <= note_counter + 1;
-            // pwm_enable   <= 1;
-          end else begin
+          note_counter <= note_counter + 1;
+          if (note_counter >= note_durations[note_index]) begin
             note_counter <= 0;
             state <= Change_Note;
           end
         end
 
         Change_Note: begin
-          // pwm_enable <= 0;
           note_index <= (note_index + 1) % NUM_NOTES;
           state <= Play_Note;
         end
       endcase
     end
   end
+
+  wire [31:0] period = clk_freq / note_frequencies[note_index];
+  wire [31:0] duty = period / 2;
+
+  pwm pwm_music (
+      .rst(rst),
+      .clk(clk),
+      .duty(duty),
+      .period(period),
+      .pwm_out(music)
+  );
 endmodule

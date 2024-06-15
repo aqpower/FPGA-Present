@@ -19,17 +19,31 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
 module present(
     input wire rst,
     input wire clk,
-    output wire light
+    input wire btn,
+    output wire btn_debounce,
+    output wire light,
+    output wire music
 );
 
 breathing_light light_module(
     .rst(rst),
     .clk(clk),
     .light(light)
+);
+
+music_gen music_module(
+    .rst(rst),
+    .clk(clk),
+    .music(music)
+);
+
+debounce debounce_module(
+    .clk(clk),
+    .btn(btn),
+    .btn_out(btn_debounce)
 );
 
 endmodule

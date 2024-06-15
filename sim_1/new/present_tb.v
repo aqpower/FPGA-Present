@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 2024/06/12 20:43:40
+// Create Date: 2024/06/16 00:09:01
 // Design Name: 
-// Module Name: present
+// Module Name: present_tb
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,16 +20,22 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module present(
-    input wire rst,
-    input wire clk,
-    output wire light
-);
+module present_tb;
 
-breathing_light light_module(
-    .rst(rst),
-    .clk(clk),
-    .light(light)
-);
+  reg  rst;
+  reg  clk;
+  wire light;
+  always #10 clk = ~clk;
 
+  present present_tb (
+      .rst  (rst),
+      .clk  (clk),
+      .light(light)
+  );
+
+  initial begin
+    rst = 1;
+    clk = 0;
+    #10 rst = 1;
+  end
 endmodule

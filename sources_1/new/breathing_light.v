@@ -31,7 +31,7 @@ module breathing_light (
   // 呼吸灯亮度变化的周期, 一个时钟周期为20ns, 一个呼吸灯周期为 20000000 * 20ns = 400ms
   reg [31:0] breathing_cycle = 25000000;
 
-  reg [31:0] cnt;
+  reg [63:0] cnt;
   parameter Init = 0, Lighter = 1, Darker = 2;
   reg  [ 1:0] state;
   reg  [31:0] duty;
@@ -42,19 +42,17 @@ module breathing_light (
       .sin_value(sin_value)
   );
 
-  initial begin
-    state <= Init;
-  end
-
-  always @(posedge clk or posedge rst) begin
+  always @(posedge clk or negedge rst) begin
     if (!rst) begin
       state <= Init;
+      cnt   <= 0;
+      index <= 0;
     end else begin
       case (light_lever)
-        2'b00: breathing_cycle = 15000000;  // 0.6s
-        2'b01: breathing_cycle = 25000000;  // 1s
-        2'b10: breathing_cycle = 35000000;  // 1.4s
-        2'b11: breathing_cycle = 50000000;  // 2s
+        2'b00: breathing_cycle <= 40000000;
+        2'b01: breathing_cycle <= 20000000;
+        2'b10: breathing_cycle <= 15000000;
+        2'b11: breathing_cycle <= 9000000;
       endcase
       case (state)
         Init: begin
@@ -71,6 +69,7 @@ module breathing_light (
         Darker: begin
           cnt <= cnt - 1;
           if (cnt <= 0) begin
+            cnt   <= 0;
             state <= Lighter;
           end
         end

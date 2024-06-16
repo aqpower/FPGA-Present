@@ -27,7 +27,6 @@ module present_tb;
   wire light;
   wire music;
   reg music_en;
-  wire music_en_debounce;
   wire [7:0] digit_enable;
   wire [7:0] segment_data;
   wire [6:0] lamp_data;
@@ -38,7 +37,6 @@ module present_tb;
       .clk(clk),
       .music_en(music_en),
       .light_lever(light_lever),
-      .music_en_debounce(music_en_debounce),
       .light(light),
       .music(music),
       .digit_enable(digit_enable),

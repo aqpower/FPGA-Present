@@ -46,20 +46,16 @@ module breathing_light (
     state <= Init;
   end
 
-  always @(light_lever) begin
-    case (light_lever)
-      2'b00: breathing_cycle = 15000000;  // 0.6s
-      2'b01: breathing_cycle = 25000000;  // 1s
-      2'b10: breathing_cycle = 35000000;  // 1.4s
-      2'b11: breathing_cycle = 50000000;  // 2s
-    endcase
-    state <= Init;
-  end
-
   always @(posedge clk or posedge rst) begin
     if (!rst) begin
       state <= Init;
     end else begin
+      case (light_lever)
+        2'b00: breathing_cycle = 15000000;  // 0.6s
+        2'b01: breathing_cycle = 25000000;  // 1s
+        2'b10: breathing_cycle = 35000000;  // 1.4s
+        2'b11: breathing_cycle = 50000000;  // 2s
+      endcase
       case (state)
         Init: begin
           state <= Lighter;

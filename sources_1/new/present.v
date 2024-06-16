@@ -24,7 +24,6 @@ module present (
     input wire clk,
     input wire music_en,
     input wire [1:0] light_lever,
-    output wire music_en_debounce,
     output wire light,
     output wire music,
     output wire [7:0] digit_enable,

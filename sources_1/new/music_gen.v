@@ -148,23 +148,34 @@ module music_gen (
     note_display[24] = 1;
   end
 
-  always @(negedge music_en) begin
-    if (state == Play_Note || state == Change_Note) begin
-      state <= Pause_Note;
-    end else if (state == Pause_Note) begin
-      state <= Play_Note;
-    end
-  end
+  reg music_en_negedge_detected;
 
-  always @(posedge clk or posedge rst) begin
+  always @(posedge clk or negedge rst) begin
     if (!rst) begin
       state <= Init;
+      music_en_negedge_detected <= 0;
+      note_index <= 0;
+      note_counter <= 0;
+      display_value <= 0;
     end else begin
+      // 检测 music_en 的下降沿
+      if (!music_en && !music_en_negedge_detected) begin
+        music_en_negedge_detected <= 1;
+        if (state == Play_Note || state == Change_Note) begin
+          state <= Pause_Note;
+        end else if (state == Pause_Note) begin
+          state <= Play_Note;
+        end
+      end else if (music_en && music_en_negedge_detected) begin
+        music_en_negedge_detected <= 0;
+      end
+
       case (state)
         Init: begin
           note_index <= 0;
           note_counter <= 0;
           display_value <= 0;
+          music_en_negedge_detected <= 0;
           state <= Pause_Note;
         end
 
@@ -188,6 +199,7 @@ module music_gen (
       endcase
     end
   end
+
 
   wire [31:0] period = clk_freq / note_frequencies[note_index];
   wire [31:0] duty = period / 2;

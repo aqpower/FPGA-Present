@@ -22,54 +22,64 @@
 
 module present_tb;
 
-  reg  rst;
-  reg  clk;
+  reg rst;
+  reg clk;
   wire light;
   wire music;
-  reg  btn;
-  wire btn_debounce;
-  always #10 clk = ~clk;
+  reg music_en;
+  wire music_en_debounce;
+  wire [7:0] digit_enable;
+  wire [7:0] segment_data;
+  wire [6:0] lamp_data;
+  reg [1:0] light_lever;
 
   present present_tb (
       .rst(rst),
       .clk(clk),
-      .btn(btn),
-      .btn_debounce(btn_debounce),
+      .music_en(music_en),
+      .light_lever(light_lever),
+      .music_en_debounce(music_en_debounce),
       .light(light),
-      .music(music)
+      .music(music),
+      .digit_enable(digit_enable),
+      .segment_data(segment_data),
+      .lamp_data(lamp_data)
   );
+  always #10 clk = ~clk;
 
   initial begin
+    light_lever = 2'b00;
     rst = 1;
     clk = 0;
     #10 rst = 1;
-    btn = 1;
+    music_en = 1;
 
     // 10ms后按下按钮
-    #10000000 btn = 0;
+    #10000000 music_en = 0;
     // 5ms后松开按钮
-    #5000000 btn = 1;
+    #5000000 music_en = 1;
 
     // 100ms后按下按钮
-    #100000000 btn = 0;
+    #100000000 music_en = 0;
     // 5ms后松开按钮 
-    #5000000 btn = 1;
+    #5000000 music_en = 1;
     // 10ms后按下按钮
-    #10000000 btn = 0;
+    #10000000 music_en = 0;
     // 5ms后松开按钮
-    #5000000 btn = 1;
+    #5000000 music_en = 1;
     // 10ms后按下按钮
-    #10000000 btn = 0;
+    #10000000 music_en = 0;
     // 按住100ms
-    #100000000 btn = 1;
+    #100000000 music_en = 1;
     // 10ms后按下按钮
-    #10000000 btn = 0;
+    #10000000 music_en = 0;
     // 5ms后松开按钮
-    #5000000 btn = 1;
+    #5000000 music_en = 1;
     // 5ms后按下按钮
-    #5000000 btn = 0;
+    #5000000 music_en = 0;
     // 3ms后松开按钮
-    #3000000 btn = 1;
+    #3000000 music_en = 1;
+    light_lever = 2'b01;
   end
 
 

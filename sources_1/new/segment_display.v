@@ -25,26 +25,44 @@ module segment_display (
     output reg [7:0] segment_data
 );
 
-  function [7:0] digit_num(input [3:0] num);
-    begin
-      case (num)
-        4'd0: digit_num = 8'b1111_1100;
-        4'd1: digit_num = 8'b0110_0000;
-        4'd2: digit_num = 8'b1101_1010;
-        4'd3: digit_num = 8'b1111_0010;
-        4'd4: digit_num = 8'b0110_0110;
-        4'd5: digit_num = 8'b1011_0110;
-        4'd6: digit_num = 8'b1011_1110;
-        4'd7: digit_num = 8'b1110_0000;
-        4'd8: digit_num = 8'b1111_1110;
-        4'd9: digit_num = 8'b1111_0110;
-        default: digit_num = 8'b1111_1111;
-      endcase
-    end
-  endfunction
-
   always @(posedge clk) begin
-    digit_enable <= 8'b11111110;  // Enable the first digit (or any other digit as required)
-    segment_data <= digit_num(num);
+    case (num)
+      4'd0: begin
+        digit_enable <= 8'b11111110;
+        segment_data <= 8'b0000_0010;
+      end
+      4'd1: begin
+        digit_enable <= 8'b11111110;
+        segment_data <= 8'b0110_0000;
+      end
+      4'd2: begin
+        digit_enable <= 8'b11111101;
+        segment_data <= 8'b1101_1010;
+      end
+      4'd3: begin
+        digit_enable <= 8'b11111011;
+        segment_data <= 8'b1111_0010;
+      end
+      4'd4: begin
+        digit_enable <= 8'b11110111;
+        segment_data <= 8'b0110_0110;
+      end
+      4'd5: begin
+        digit_enable <= 8'b11101111;
+        segment_data <= 8'b1011_0110;
+      end
+      4'd6: begin
+        digit_enable <= 8'b11011111;
+        segment_data <= 8'b1011_1110;
+      end
+      4'd7: begin
+        digit_enable <= 8'b10111111;
+        segment_data <= 8'b1110_0000;
+      end
+      default: begin
+        digit_enable <= 8'b11111111;
+        segment_data <= 8'b1111_1111;
+      end
+    endcase
   end
 endmodule

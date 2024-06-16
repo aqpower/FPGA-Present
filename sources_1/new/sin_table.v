@@ -283,6 +283,7 @@ module sin_table (
       8'd253: sin_value = 8'd254;
       8'd254: sin_value = 8'd254;
       8'd255: sin_value = 8'd255;
+      8'd256: sin_value = 8'd255;
       default: sin_value = 8'd0;
     endcase
   end

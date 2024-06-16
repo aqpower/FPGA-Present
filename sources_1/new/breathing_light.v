@@ -20,15 +20,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module breathing_light (
-    input  wire rst,
-    input  wire clk,
+    input wire rst,
+    input wire clk,
+    input wire [1:0] light_lever,
     output wire light
 );
   // 时钟频率为50MHz，时钟周期为1 / 50MHz = 20ns
   // 约定一个PWN周期为256个时钟周期, 生成PWN频率为 50MHz / 256 = 195312.5Hz, 一个PWM周期为 256 * 20ns = 5.12us
   parameter period = 256;
   // 呼吸灯亮度变化的周期, 一个时钟周期为20ns, 一个呼吸灯周期为 20000000 * 20ns = 400ms
-  parameter breathing_cycle = 25000000;
+  reg [31:0] breathing_cycle = 25000000;
+
   reg [31:0] cnt;
   parameter Init = 0, Lighter = 1, Darker = 2;
   reg  [ 1:0] state;
@@ -41,6 +43,16 @@ module breathing_light (
   );
 
   initial begin
+    state <= Init;
+  end
+
+  always @(light_lever) begin
+    case (light_lever)
+      2'b00: breathing_cycle = 15000000;  // 0.6s
+      2'b01: breathing_cycle = 25000000;  // 1s
+      2'b10: breathing_cycle = 35000000;  // 1.4s
+      2'b11: breathing_cycle = 50000000;  // 2s
+    endcase
     state <= Init;
   end
 
